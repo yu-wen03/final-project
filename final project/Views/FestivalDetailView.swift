@@ -13,6 +13,7 @@ struct FestivalDetailView: View {
     @State private var showAlert = false
     @State private var heartScale = 1.0
     @State private var showEditFestival = false
+    @State private var alertMessage = ""
     
     var body: some View {
         ScrollView {
@@ -59,32 +60,31 @@ struct FestivalDetailView: View {
                         .tint(Color.cyan.opacity(0.7))
                     
                     Button {
+                        let wasFavorite = festival.isFavorite
+                        
                         withAnimation(.spring) {
                             festival.isFavorite.toggle()
                             heartScale = 1.4
                         }
-                        
+
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.2) {
                             withAnimation(.spring) {
                                 heartScale = 1.0
                             }
                         }
-                        
+
+                        alertMessage = wasFavorite ? "已取消收藏" : "已加入收藏"
                         showAlert = true
                     } label: {
                         HStack {
                             Image(systemName: festival.isFavorite ? "heart.fill" : "heart")
                                 .scaleEffect(heartScale)
-                            
+
                             Text(festival.isFavorite ? "已收藏" : "加入收藏")
                         }
                         .frame(maxWidth: .infinity)
                         .padding()
-                        .background(
-                            festival.isFavorite
-                            ? Color(.systemGray2)
-                            : Color(.systemGray4)
-                        )
+                        .background(Color(.systemGray3))
                         .foregroundStyle(.black)
                         .clipShape(RoundedRectangle(cornerRadius: 12))
                     }
@@ -116,7 +116,7 @@ struct FestivalDetailView: View {
         .sheet(isPresented: $showWebsite) {
             FestivalWebView(urlString: festival.website)
         }
-        .alert(festival.isFavorite ? "已加入收藏" : "已取消收藏", isPresented: $showAlert) {
+        .alert(alertMessage, isPresented: $showAlert) {
             Button("OK") { }
         }
     }
